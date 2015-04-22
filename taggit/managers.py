@@ -50,7 +50,7 @@ def _model_name(model):
 
 
 class TaggableRel(ManyToManyRel):
-    def __init__(self, field, related_name, through, to=None):
+    def __init__(self, field, related_name, through, to=None, through_fields=None):
         self.to = to
         self.related_name = related_name
         self.limit_choices_to = {}
@@ -58,6 +58,7 @@ class TaggableRel(ManyToManyRel):
         self.multiple = True
         self.through = None if VERSION < (1, 7) else through
         self.field = field
+        self.through_fields = through_fields
 
     def get_joining_columns(self):
         return self.field.get_reverse_joining_columns()
@@ -256,14 +257,14 @@ class TaggableManager(RelatedField, Field):
 
     def __init__(self, verbose_name=_("Tags"),
                  help_text=_("A comma-separated list of tags."),
-                 through=None, blank=False, related_name=None, to=None,
+                 through=None, blank=False, related_name=None, to=None, through_fields=None,
                  manager=_TaggableManager):
 
         self.through = through or TaggedItem
         self.swappable = False
         self.manager = manager
 
-        rel = TaggableRel(self, related_name, self.through, to=to)
+        rel = TaggableRel(self, related_name, self.through, to=to, through_fields=through_fields)
 
         Field.__init__(
             self,
